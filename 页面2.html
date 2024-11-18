@@ -1,0 +1,245 @@
+<?php
+session_start();
+$database = './usersdb.php';
+$success_page = '';
+$newusername = '';
+$newemail = '';
+$newfullname = '';
+$error_message = '';
+if (!file_exists($database))
+{
+   die('User database not found!');
+   exit;
+}
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form_name']) && $_POST['form_name'] == 'signupform')
+{
+   $newusername = $_POST['username'];
+   $newemail = $_POST['email'];
+   $newpassword = $_POST['password'];
+   $confirmpassword = $_POST['confirmpassword'];
+   $newfullname = $_POST['fullname'];
+   $code = 'NA';
+   if ($newpassword != $confirmpassword)
+   {
+      $error_message = '密码和确认密码不一致！  ';
+   }
+   else
+   if (!preg_match("/^[A-Za-z0-9-_!@$ ]{1,50}$/", $newusername))
+   {
+      $error_message = '用户名无效，请检查并再次尝试！ ';
+   }
+   else
+   if (!preg_match("/^[A-Za-z0-9-_!@$]{1,50}$/", $newpassword))
+   {
+      $error_message = '密码无效，请检查并再次尝试。 ';
+   }
+   else
+   if (!preg_match("/^[A-Za-z0-9-_!@$ ]{1,50}$/", $newfullname))
+   {
+      $error_message = '全名无效，请检查并再次尝试！ ';
+   }
+   else
+   if (!preg_match("/^.+@.+\..+$/", $newemail))
+   {
+      $error_message = '电子邮件不是有效的电子邮件地址。请检查并再次尝试。  ';
+   }
+   else
+   if (isset($_POST['captcha'],$_SESSION['captcha']) && md5($_POST['captcha']) == $_SESSION['captcha'])
+   {
+      unset($_POST['captcha'],$_SESSION['captcha']);
+   }
+   else
+   {
+      $error_message = 'CAPTCHA verification failed.';
+   }
+   $avatar_folder = 'avatars';
+   $avatar_max_width = 256;
+   $avatar_max_height = 256;
+   $newavatar = '';
+   if (isset($_FILES['avatar']) && $_FILES['avatar']['name'] != "")
+   {
+      if (!file_exists($avatar_folder))
+      {
+         if (!mkdir($avatar_folder, 0777)) 
+         { 
+            die("Failed to create images directory.");
+         }
+      }
+      switch ($_FILES['avatar']['error'])
+      {
+         case UPLOAD_ERR_OK:
+            if ($_FILES['avatar']['type'] == 'image/gif' || $_FILES['avatar']['type'] == 'image/jpeg' || $_FILES['avatar']['type'] == 'image/pjpeg' || $_FILES['avatar']['type'] == 'image/png' || $_FILES['avatar']['type'] == 'image/x-png')
+            {
+               list($width, $height) = getimagesize($_FILES['avatar']['tmp_name']);
+               if ($width <= $avatar_max_width && $height <= $avatar_max_height)
+               {
+                  $prefix = rand(111111, 999999);
+                  $newavatar = $prefix . "_" . str_replace(" ", "_", $_FILES['avatar']['name']);
+                  if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $avatar_folder . "/" . $newavatar))
+                  {
+                     $error_message = "Upload failed, please verify the folder's permissions.";
+                  }
+               }
+               else
+               {
+                  $error_message = "The image is too big.";
+               }
+            }
+            else
+            {
+               $error_message = "Wrong file type, please only use jpg, gif or png images.";
+            }
+            break;
+         case UPLOAD_ERR_INI_SIZE:
+            $error_message = "The uploaded file exceeds the 'upload_max_filesize' directive.";
+            break;
+         case UPLOAD_ERR_FORM_SIZE:
+            $error_message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.";
+            break;
+         case UPLOAD_ERR_PARTIAL:
+            $error_message = "The uploaded file was only partially uploaded.";
+            break;
+         case UPLOAD_ERR_NO_FILE:
+            $error_message = "No file was uploaded.";
+            break;
+         case UPLOAD_ERR_NO_TMP_DIR:
+            $error_message = "Missing a temporary folder.";
+            break;
+         case UPLOAD_ERR_CANT_WRITE:
+            $error_message = "Failed to write file to disk.";
+            break;
+         case UPLOAD_ERR_EXTENSION:
+            $error_message = "File upload stopped by extension.";
+            break;
+      }
+   }
+   $items = file($database, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+   foreach($items as $line)
+   {
+      list($username, $password, $email, $fullname) = explode('|', trim($line));
+      if ($newusername == $username)
+      {
+         $error_message = '用户名已被使用。请选择另一个用户名。 ';
+         break;
+      }
+   }
+   if (empty($error_message))
+   {
+      $file = fopen($database, 'a');
+      fwrite($file, $newusername);
+      fwrite($file, '|');
+      fwrite($file, md5($newpassword));
+      fwrite($file, '|');
+      fwrite($file, $newemail);
+      fwrite($file, '|');
+      fwrite($file, $newfullname);
+      fwrite($file, '|1|');
+      fwrite($file, $code);
+      fwrite($file, "\r\n");
+      fclose($file);
+      $subject = '您的新账户  ';
+      $message = '一个新账户已被设置。  ';
+      $message .= "\r\nUsername: ";
+      $message .= $newusername;
+      $message .= "\r\nPassword: ";
+      $message .= $newpassword;
+      $message .= "\r\n";
+      $header  = "From: xiaoh0372@gmail.com"."\r\n";
+      $header .= "Reply-To: xiaoh0372@gmail.com"."\r\n";
+      $header .= "MIME-Version: 1.0"."\r\n";
+      $header .= "Content-Type: text/plain; charset=utf-8"."\r\n";
+      $header .= "Content-Transfer-Encoding: 8bit"."\r\n";
+      $header .= "X-Mailer: PHP v".phpversion();
+      mail($newemail, $subject, $message, $header);
+      header('Location: '.$success_page);
+      exit;
+   }
+}
+?>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>无标题页面</title>
+<meta name="generator" content="WYSIWYG Web Builder 19 - https://www.wysiwygwebbuilder.com">
+<link href="Untitled1.css" rel="stylesheet">
+<link href="页面2.css" rel="stylesheet">
+<script src="jquery-3.7.1.min.js"></script>
+<script>
+$(document).ready(function()
+{
+   $("#avatar :file").on('change', function()
+   {
+      var input = $(this).parents('.input-group').find(':text');
+      input.val($(this).val());
+   });
+});
+</script>
+</head>
+<body>
+<img src="images/img0004.png" id="Banner1" alt="声明：注册可能会失败，毕竟我没上过计算机课" style="border-width:0;position:absolute;left:0px;top:0px;width:1479px;height:40px;z-index:0;" width="1479" height="40">
+<div id="wb_Signup1" style="position:absolute;left:204px;top:90px;width:1016px;height:558px;z-index:1;">
+<form name="signupform" method="post" accept-charset="UTF-8" enctype="multipart/form-data" action="<?php echo basename(__FILE__); ?>" id="signupform">
+<input type="hidden" name="form_name" value="signupform">
+<table id="Signup1">
+<tr>
+   <td class="header">注册一个新账户 </td>
+</tr>
+<tr>
+   <td class="label"><label for="fullname">全名  </label></td>
+</tr>
+<tr>
+   <td class="row"><input class="input" name="fullname" type="text" id="fullname" value="<?php echo htmlspecialchars($newfullname); ?>"></td>
+</tr>
+<tr>
+   <td class="label"><label for="username">用户名</label></td>
+</tr>
+<tr>
+   <td class="row"><input class="input" name="username" type="text" id="username" value="<?php echo htmlspecialchars($newusername); ?>"></td>
+</tr>
+<tr>
+   <td class="label"><label for="password">密码</label></td>
+</tr>
+<tr>
+   <td class="row"><input class="input" name="password" type="password" id="password"></td>
+</tr>
+<tr>
+   <td class="label"><label for="confirmpassword">确认密码 </label></td>
+</tr>
+<tr>
+   <td class="row"><input class="input" name="confirmpassword" type="password" id="confirmpassword"></td>
+</tr>
+<tr>
+   <td class="label"><label for="email">电子邮箱</label></td>
+</tr>
+<tr>
+   <td class="row"><input class="input" name="email" type="text" id="email" value="<?php echo htmlspecialchars($newemail); ?>"></td>
+</tr>
+<tr>
+   <td class="label"><label for="email">头像</label></td>
+</tr>
+<tr>
+   <td class="row"><div class="input-group" id="avatar"><input class="input" type="text" readonly=""><label class="input-group-btn"><input type="file" name="avatar" style="display:none;"><span class="button">Browse...</span></label></div></td>
+</tr>
+<tr>
+   <td style="text-align:left;height:34px"><img src="signup1_captcha.php" alt="" style="border-width:0;width:100px;height:34px;"></td>
+</tr>
+<tr>
+   <td class="label"><label for="captcha">验证码</label></td>
+</tr>
+<tr>
+   <td class="row"><input class="input" name="captcha" type="text" id="captcha"></td>
+</tr>
+<tr>
+   <td><?php echo $error_message; ?></td>
+</tr>
+<tr>
+   <td style="text-align:center;vertical-align:bottom"><input class="button" type="submit" name="signup" value="创建用户  " id="signup"></td>
+</tr>
+</table>
+</form>
+</div>
+<div id="wb_Shape1" style="position:absolute;left:214px;top:684px;width:396px;height:48px;z-index:2;">
+<a href="./页面1.html"><img src="images/img0001.png" id="Shape1" alt="" width="396" height="48" style="width:396px;height:48px;"></a></div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+body
+{
+   background-color: #FFFFFF;
+   color: #000000;
+   font-family: Arial;
+   font-weight: normal;
+   font-size: 13px;
+   line-height: 1.1875;
+   margin: 0;
+   padding: 0;
+}
+#Signup1
+{
+   background-color: #FFFFFF;
+   border: 1px solid #DEE2E6;
+   border-radius: 0px;
+   color: #212529;
+   font-family: Arial;
+   font-weight: normal;
+   font-size: 13px;
+   font-style: normal;
+   text-align: left;
+   text-decoration: none;
+   border-spacing: 6px;
+   width: 1018px;
+   height: 560px;
+}
+#Signup1 td
+{
+   padding: 0;
+}
+#Signup1 .header
+{
+   background-color: #F8F8F8;
+   color: #212529;
+   height: 14px;
+   padding: 4px 4px 4px 4px;
+   text-align: center;
+}
+#Signup1 .label
+{
+   height: 14px;
+}
+#Signup1 .row
+{
+   height: 28px;
+   text-align: left;
+}
+#Signup1 .input
+{
+   background-color: #FFFFFF;
+   border: 1px solid #DEE2E6;
+   border-radius: 0px;
+   color: #212529;
+   font-family: Arial;
+   font-weight: normal;
+   font-size: 13px;
+   font-style: normal;
+   text-decoration: none;
+   width: 100%;
+   height: 28px;
+   box-sizing: border-box;
+   padding: 6px 4px 6px 4px;
+}
+#Signup1 .input:focus
+{
+   border-color: #66AFE9;
+   outline: 0;
+   box-shadow: inset 0px 1px 1px rgba(0,0,0,0.075), 0px 0px 8px rgba(102,175,233,0.60);
+}
+#Signup1 .button
+{
+   background-color: #0D6EFD;
+   border: 1px solid #0D6EFD;
+   border-radius: 0px;
+   color: #FFFFFF;
+   font-family: Arial;
+   font-weight: normal;
+   font-size: 13px;
+   font-style: normal;
+   text-decoration: none;
+   padding: 4px 14px 4px 14px;
+   -webkit-appearance: none;
+}
+#avatar *
+{
+   box-sizing: border-box;
+}
+#avatar
+{
+   display: table;
+   border-collapse: separate;
+   border-spacing: 0;
+}
+#avatar .input
+{
+   position: relative;
+   z-index: 2;
+   float: left;
+   width: 100%;
+   margin-bottom: 0;
+}
+#avatar .input-group-btn, #avatar .input
+{
+   display: table-cell;
+}
+#avatar .input
+{
+   border-bottom-right-radius: 0;
+   border-top-right-radius: 0;
+   margin: 0;
+}
+#avatar .input-group-btn
+{
+   width: 1%;
+   white-space: nowrap;
+   vertical-align: middle;
+   position: relative;
+   font-size: 0;
+   white-space: nowrap;
+}
+#avatar .button
+{
+   border-bottom-left-radius: 0;
+   border-top-left-radius: 0;
+   display: inline-block;
+   height: 28px;
+   line-height: 14px;
+   margin-left: -1px;
+   padding: 6px 8px 6px 8px;
+   position: relative;
+}
+#Shape1
+{
+   border-width: 0;
+   vertical-align: top;
+}
